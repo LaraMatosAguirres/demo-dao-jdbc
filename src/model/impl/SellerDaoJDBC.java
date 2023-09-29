@@ -137,6 +137,7 @@ public class SellerDaoJDBC implements SellerDao {
 		obj.setName(rs.getString("Name"));
 		obj.setEmail(rs.getString("Email"));
 		obj.setBaseSalary(rs.getDouble("BaseSalary"));
+		obj.setBirthDate(rs.getDate("BirthDate"));
 		obj.setDepartment(dep);
 		return obj;
 
@@ -153,42 +154,38 @@ public class SellerDaoJDBC implements SellerDao {
 	public List<Seller> findAll() {
 		PreparedStatement st = null;
 		ResultSet rs = null;
-		
 		try {
 			st = con.prepareStatement(
 					"SELECT seller.*,department.Name as DepName "
 					+ "FROM seller INNER JOIN department "
 					+ "ON seller.DepartmentId = department.Id "
-					+ "ORDER BY Name ");
-					
+					+ "ORDER BY Name");
+			
 			rs = st.executeQuery();
 			
-			Map<Integer, Department> map = new HashMap<>(); 
-			
 			List<Seller> list = new ArrayList<>();
+			Map<Integer, Department> map = new HashMap<>();
 			
-			while(rs.next()) {
+			while (rs.next()) {
 				
 				Department dep = map.get(rs.getInt("DepartmentId"));
 				
-				if(dep == null) {
+				if (dep == null) {
 					dep = instanciateDepartment(rs);
 					map.put(rs.getInt("DepartmentId"), dep);
 				}
-				else {
-				Seller obj = instanciateSeller(rs, dep); 
+				
+				Seller obj = instanciateSeller(rs, dep);
 				list.add(obj);
-				}
 			}
-				return list;
+			return list;
 		}
-		catch(SQLException e) {
+		catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		}
 		finally {
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
-			
 		}
 	}
 
